@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المنصة الإدارية النهائية | علي PRO</title>
+    <style>
+        :root { --gold: #d4af37; --owner: #ff2d55; --bg: #050505; --card: #0a0a0a; --w: #fff; --red: #ff3e3e; --green: #2ecc71; }
+        * { box-sizing: border-box; transition: 0.3s; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--w); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 280px; background: #000; border-left: 1px solid #222; padding: 25px; display: flex; flex-direction: column; z-index: 100; }
+        .nav-link { background: none; border: none; color: #666; padding: 14px; text-align: right; cursor: pointer; border-radius: 12px; width: 100%; margin-bottom: 5px; font-weight: bold; }
+        .nav-link:hover, .nav-link.active { background: #111; color: var(--gold); border-right: 4px solid var(--gold); }
+
+        .main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top right, #151515, #050505); }
+        .page { display: none; flex-direction: column; animation: fadeIn 0.4s ease; }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--card); padding: 25px; border-radius: 18px; border: 1px solid #222; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input, select, textarea { width: 100%; padding: 14px; background: #000; border: 1px solid #333; color: #fff; border-radius: 12px; margin: 8px 0; outline: none; }
+        .btn { background: var(--gold); color: #000; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; }
+        .btn.danger { background: var(--red); color: #fff; }
+        .btn:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+
+        /* Store & Staff Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        .item-card { background: #000; border: 1px solid #222; border-radius: 20px; padding: 20px; text-align: center; position: relative; }
+        .item-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; }
+
+        /* Logs */
+        .log-box { background: #000; border: 1px solid #222; height: 400px; overflow-y: auto; padding: 20px; border-radius: 15px; font-family: 'Courier New', monospace; }
+        .log-entry { padding: 8px 0; border-bottom: 1px solid #111; font-size: 0.9rem; }
+        .log-time { color: var(--gold); margin-left: 10px; }
+
+        /* Login */
+        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: #0a0a0a; padding: 45px; border-radius: 30px; border: 1px solid var(--gold); width: 380px; text-align: center; }
+        .social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color:var(--gold); margin-bottom: 30px;">نظام الإدارة المركزي</h2>
+            <div class="social-btn" style="background:#fff; color:#000;" onclick="socialLogin('Google')">الدخول بواسطة Google</div>
+            <div class="social-btn" style="background:#000; color:#fff; border:1px solid #444;" onclick="socialLogin('Apple ID')">الدخول بواسطة Apple</div>
+            <hr style="border:0; border-top:1px solid #222; margin:20px 0;">
+            <input type="text" id="l-name" placeholder="اسم المستخدم">
+            <input type="password" id="l-key" placeholder="الكود السري">
+            <button class="btn" onclick="manualLogin()">دخول الإدارة</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div style="text-align:center; margin-bottom:35px;">
+            <div id="avatar" style="width:70px; height:70px; border:2px solid var(--gold); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:2rem; background:#111;">🛡️</div>
+            <strong id="me-name" style="font-size:1.1rem;">--</strong><br>
+            <span id="me-role" style="font-size:0.75rem; font-weight:bold; letter-spacing:1px;">--</span>
+        </div>
+        <button class="nav-link active" onclick="showPage('p-dash')">🏠 الواجهة الرئيسية</button>
+        <button class="nav-link" onclick="showPage('p-store')">🛒 المتجر والسلع</button>
+        <button class="nav-link" onclick="showPage('p-tickets')">🎫 نظام التذاكر</button>
+        
+        <div id="admin-sec" style="display:none;">
+            <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
+            <button class="nav-link" style="color:var(--owner)" onclick="showPage('p-roles')">🛡️ إنشاء الرتب</button>
+            <button class="nav-link" style="color:var(--owner)" onclick="showPage('p-staff')">👥 إدارة الموظفين</button>
+            <button class="nav-link" style="color:var(--owner)" onclick="showPage('p-logs')">📜 السجل العام (Logs)</button>
+        </div>
+        <button class="btn" style="margin-top:auto; background:#111; color:#555;" onclick="location.reload()">تسجيل الخروج</button>
+    </div>
+
+    <div class="main">
+        <div id="p-dash" class="page active">
+            <h1>أهلاً بك يا علي في نظامك النهائي</h1>
+            <div class="card">هذا النظام صُمم خصيصاً ليعطيك السيطرة المطلقة على الرتب، الموظفين، والعمليات التجارية.</div>
+        </div>
+
+        <div id="p-store" class="page">
+            <h2>🛒 متجر السلع والخدمات</h2>
+            <div id="owner-store-add" class="card" style="display:none;">
+                <h3>+ إضافة سلعة للمتجر</h3>
+                <input type="text" id="pd-n" placeholder="اسم السلعة">
+                <input type="text" id="pd-p" placeholder="السعر">
+                <input type="text" id="pd-i" placeholder="رابط الصورة">
+                <button class="btn" onclick="addProduct()">حفظ ونشر السلعة</button>
+            </div>
+            <div class="grid" id="store-list"></div>
+        </div>
+
+        <div id="p-roles" class="page">
+            <h2>🛡️ إنشاء الرتب والصلاحيات</h2>
+            <div class="card">
+                <h3>+ إضافة رتبة جديدة</h3>
+                <input type="text" id="rl-n" placeholder="اسم الرتبة">
+                <input type="color" id="rl-c" value="#d4af37">
+                <div style="background:#111; padding:15px; border-radius:12px; margin:10px 0;">
+                    <label style="display:block;"><input type="checkbox" id="p-fire"> صلاحية الفصل (طرد)</label>
+                    <label style="display:block;"><input type="checkbox" id="p-promo"> صلاحية الترقية والتخفيض</label>
+                </div>
+                <button class="btn" onclick="createRole()">إنشاء الرتبة الآن</button>
+            </div>
+            <div id="roles-view-list"></div>
+        </div>
+
+        <div id="p-staff" class="page">
+            <h2>👥 إدارة الطاقم (فصل/ترقية/تخفيض)</h2>
+            <div class="card">
+                <h3>+ توظيف موظف جديد</h3>
+                <input type="text" id="st-n" placeholder="الاسم">
+                <input type="text" id="st-k" placeholder="الكود السري">
+                <select id="st-r"></select>
+                <button class="btn" onclick="hire()">تثبيت التوظيف</button>
+            </div>
+            <div id="staff-view-list"></div>
+        </div>
+
+        <div id="p-tickets" class="page">
+            <h2>🎫 مركز التذاكر والشات</h2>
+            <div id="tkt-user-zone" class="card">
+                <textarea id="tkt-msg" placeholder="اكتب طلبك هنا..." rows="4"></textarea>
+                <button class="btn" onclick="openTicket()">فتح تذكرة دعم</button>
+            </div>
+            <div id="tkt-admin-zone" style="display:none;"></div>
+            <div id="chat-ui" class="card" style="display:none; height:450px; flex-direction:column;">
+                <div id="chat-msgs" style="flex:1; overflow-y:auto; padding:10px; margin-bottom:15px;"></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="chat-in" placeholder="اكتب رسالتك...">
+                    <button class="btn" style="width:100px;" onclick="sendChat()">إرسال</button>
+                </div>
+                <button class="btn danger" style="margin-top:10px;" onclick="closeTkt()">إغلاق التذكرة</button>
+            </div>
+        </div>
+
+        <div id="p-logs" class="page">
+            <h2>📜 سجل المراقبة الإداري (Logs)</h2>
+            <div class="log-box" id="logs-view"></div>
+        </div>
+    </div>
+
+    <script>
+        let db = {
+            user: null,
+            roles: JSON.parse(localStorage.getItem('AL_V25_ROLES')) || [{name:'أونر', color:'#ff2d55', p_fire:true, p_promo:true}],
+            staff: JSON.parse(localStorage.getItem('AL_V25_STAFF')) || [],
+            products: JSON.parse(localStorage.getItem('AL_V25_PROD')) || [],
+            logs: JSON.parse(localStorage.getItem('AL_V25_LOGS')) || [],
+            tkts: JSON.parse(localStorage.getItem('AL_V25_TKTS')) || [],
+            msgs: JSON.parse(localStorage.getItem('AL_V25_MSGS')) || []
+        };
+
+        const OWNER_KEY = "1122334455";
+
+        function save() {
+            localStorage.setItem('AL_V25_ROLES', JSON.stringify(db.roles));
+            localStorage.setItem('AL_V25_STAFF', JSON.stringify(db.staff));
+            localStorage.setItem('AL_V25_PROD', JSON.stringify(db.products));
+            localStorage.setItem('AL_V25_LOGS', JSON.stringify(db.logs));
+            localStorage.setItem('AL_V25_TKTS', JSON.stringify(db.tkts));
+            localStorage.setItem('AL_V25_MSGS', JSON.stringify(db.msgs));
+        }
+
+        function addLog(txt) {
+            const time = new Date().toLocaleTimeString();
+            db.logs.unshift(`<div class="log-entry"><span class="log-time">[${time}]</span> ${txt}</div>`);
+            save(); renderLogs();
+        }
+
+        // تسجيل الدخول
+        function socialLogin(type) {
+            const n = prompt(`أدخل اسمك للمتابعة عبر ${type}:`);
+            if(!n) return;
+            db.user = { name: n, role: {name:'زبون', color:'#888', p_fire:false, p_promo:false} };
+            addLog(`الزبون <b>${n}</b> سجل دخوله عبر ${type}`);
+            start();
+        }
+
+        function manualLogin() {
+            const n = document.getElementById('l-name').value;
+            const k = document.getElementById('l-key').value;
+            let role = {name:'زبون', color:'#888', p_fire:false, p_promo:false};
+            if(k === OWNER_KEY) role = db.roles[0];
+            else {
+                const s = db.staff.find(x => x.name === n && x.key === k);
+                if(s) role = db.roles.find(r => r.name === s.role);
+            }
+            db.user = { name: n, role };
+            addLog(`المستخدم <b>${n}</b> دخل النظام برتبة ${role.name}`);
+            start();
+        }
+
+        function start() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('me-name').innerText = db.user.name;
+            document.getElementById('me-role').innerText = db.user.role.name;
+            document.getElementById('me-role').style.color = db.user.role.color;
+            if(db.user.role.name === 'أونر' || db.user.role.p_fire || db.user.role.p_promo) {
+                document.getElementById('admin-sec').style.display = 'block';
+                document.getElementById('owner-store-add').style.display = 'block';
+            }
+            if(db.user.role.name !== 'زبون') document.getElementById('tkt-admin-zone').style.display = 'block';
+            renderAll();
+        }
+
+        // الإدارة (فصل/ترقية/تخفيض)
+        function createRole() {
+            const n = document.getElementById('rl-n').value;
+            const c = document.getElementById('rl-c').value;
+            const f = document.getElementById('p-fire').checked;
+            const p = document.getElementById('p-promo').checked;
+            if(!n) return;
+            db.roles.push({name:n, color:c, p_fire:f, p_promo:p});
+            addLog(`تم إنشاء رتبة جديدة: ${n}`);
+            save(); renderAll();
+        }
+
+        function hire() {
+            const n = document.getElementById('st-n').value;
+            const k = document.getElementById('st-k').value;
+            const r = document.getElementById('st-r').value;
+            if(!n || !k) return;
+            db.staff.push({name:n, key:k, role:r});
+            addLog(`توظيف الموظف <b>${n}</b> برتبة ${r}`);
+            save(); renderAll();
+        }
+
+        function fire(name) {
+            if(!db.user.role.p_fire && db.user.role.name !== 'أونر') return alert("لا تملك صلاحية فصل!");
+            db.staff = db.staff.filter(s => s.name !== name);
+            addLog(`❌ تم <b>فصل</b> ${name} بواسطة ${db.user.name}`);
+            save(); renderAll();
+        }
+
+        function changeRank(name, type) {
+            if(!db.user.role.p_promo && db.user.role.name !== 'أونر') return alert("لا تملك صلاحية الترقيات!");
+            const s = db.staff.find(x => x.name === name);
+            const curIdx = db.roles.findIndex(r => r.name === s.role);
+            let targetIdx = type === 'up' ? curIdx - 1 : curIdx + 1;
+
+            if(targetIdx >= 0 && targetIdx < db.roles.length) {
+                const old = s.role;
+                s.role = db.roles[targetIdx].name;
+                addLog(`🔄 ${type==='up'?'ترقية':'تخفيض'} ${name} من ${old} إلى ${s.role}`);
+                save(); renderAll();
+            }
+        }
+
+        // المتجر
+        function addProduct() {
+            const n = document.getElementById('pd-n').value;
+            const p = document.getElementById('pd-p').value;
+            const i = document.getElementById('pd-i').value || 'https://via.placeholder.com/150';
+            if(!n || !p) return;
+            db.products.push({n, p, i});
+            addLog(`إضافة منتج جديد: ${n}`);
+            save(); renderAll();
+        }
+
+        function buy(n) {
+            alert(`تم طلب ${n}! تم فتح تذكرة لمتابعة الشراء.`);
+            const id = Date.now();
+            db.tkts.push({id, creator: db.user.name, status: 'open', type: 'شراء'});
+            db.msgs.push({id, sender: 'النظام', r: {name:'BOT', color:'#gold'}, content: `طلب شراء لـ: ${n}`});
+            save(); renderAll();
+        }
+
+        // تذاكر
+        function openTicket() {
+            const m = document.getElementById('tkt-msg').value; if(!m) return;
+            const id = Date.now();
+            db.tkts.push({id, creator: db.user.name, status:'open', type:'دعم'});
+            db.msgs.push({id, sender: db.user.name, r: db.user.role, content: m});
+            save(); renderAll(); openChat(id);
+        }
+
+        function claim(id) {
+            const t = db.tkts.find(x => x.id === id);
+            t.status = 'active';
+            save(); renderAll(); openChat(id);
+        }
+
+        function openChat(id) {
+            window.activeTkt = id;
+            document.getElementById('tkt-user-zone').style.display = 'none';
+            document.getElementById('tkt-admin-zone').style.display = 'none';
+            document.getElementById('chat-ui').style.display = 'flex';
+            renderMsgs();
+        }
+
+        function sendChat() {
+            const c = document.getElementById('chat-in').value; if(!c) return;
+            db.msgs.push({id: window.activeTkt, sender: db.user.name, r: db.user.role, content: c});
+            save(); renderMsgs(); document.getElementById('chat-in').value = "";
+        }
+
+        function renderMsgs() {
+            const box = document.getElementById('chat-msgs');
+            box.innerHTML = db.msgs.filter(m => m.id === window.activeTkt).map(m => `
+                <div style="background:#111; padding:10px; border-radius:10px; margin-bottom:10px; border-right:3px solid ${m.r.color}">
+                    <small style="color:${m.r.color}">${m.r.name} | ${m.sender}</small><br>${m.content}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function closeTkt() {
+            db.tkts = db.tkts.filter(x => x.id !== window.activeTkt);
+            save(); location.reload();
+        }
+
+        // رندرة القوائم
+        function renderLogs() { document.getElementById('logs-view').innerHTML = db.logs.join(''); }
+
+        function renderAll() {
+            document.getElementById('st-r').innerHTML = db.roles.map(r => `<option>${r.name}</option>`).join('');
+            document.getElementById('store-list').innerHTML = db.products.map(p => `
+                <div class="item-card"><img src="${p.i}"><h4>${p.n}</h4><b style="color:var(--green)">${p.p}</b><br><br><button class="btn" onclick="buy('${p.n}')">شراء</button></div>
+            `).join('');
+            document.getElementById('roles-view-list').innerHTML = db.roles.map(r => `<div class="card" style="border-right:5px solid ${r.color}">رتبة: ${r.name}</div>`).join('');
+            document.getElementById('staff-view-list').innerHTML = `<h3>الطاقم الحالي:</h3>` + db.staff.map(s => {
+                const r = db.roles.find(x => x.name === s.role) || {color:'#fff'};
+                return `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-right: 5px solid ${r.color};">
+                    <div><b style="color:${r.color}">${r.name}</b> | ${s.name}</div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" style="width:40px; padding:5px;" onclick="changeRank('${s.name}', 'up')">⬆️</button>
+                        <button class="btn" style="width:40px; padding:5px;" onclick="changeRank('${s.name}', 'down')">⬇️</button>
+                        <button class="btn danger" style="width:80px; padding:5px;" onclick="fire('${s.name}')">فصل ❌</button>
+                    </div>
+                </div>`;
+            }).join('');
+            document.getElementById('tkt-admin-zone').innerHTML = `<h3>تذاكر معلقة:</h3>` + db.tkts.filter(t => t.status === 'open').map(t => `<div class="card">${t.creator} - ${t.type} <button class="btn" style="width:80px; float:left;" onclick="claim(${t.id})">استلام</button></div>`).join('');
+            renderLogs();
+        }
+
+        function showPage(p) {
+            document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+            document.getElementById(p).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
